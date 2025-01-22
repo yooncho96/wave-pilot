@@ -6,7 +6,7 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 
-from data.db_helper import DBHelper
+from data.emotion_db_helper import DBHelper
 from openai_api.openai_helper import transcribe_audio_via_openai, get_emotion_scores
 
 

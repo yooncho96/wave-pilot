@@ -5,14 +5,8 @@ import sys
 import openai
 import json
 
-# If using Azure OpenAI:
-openai.api_type = "azure"
-openai.api_base = os.getenv("OPENAI_API_BASE", "https://YOUR-RESOURCE-NAME.openai.azure.com/")
-openai.api_key = os.getenv("OPENAI_API_KEY", "YOUR_AZURE_OPENAI_KEY")
-openai.api_version = os.getenv("OPENAI_API_VERSION", "2023-03-15-preview")
-
-AZURE_DEPLOYMENT_NAME = os.getenv("OPENAI_DEPLOYMENT_NAME", "YOUR_MODEL_DEPLOYMENT_NAME")
-
+from dotenv import load_dotenv
+load_dotenv()
 
 def transcribe_audio_via_openai(audio_file_path: str) -> str:
     """

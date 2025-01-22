@@ -5,7 +5,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 
-from data.db_helper import DBHelper
+from data.emotion_db_helper import DBHelper
 
 class EmotionDataScreen(Screen):
     """

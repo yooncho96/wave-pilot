@@ -5,7 +5,7 @@ from kivy.uix.screenmanager import ScreenManager
 
 # Import our screens
 from screens.home import HomeScreen
-from screens.speech import SpeechScreen
+from screens.record import SpeechScreen
 from screens.emotion_data import EmotionDataScreen
 
 class MyScreenManager(ScreenManager):
@@ -14,7 +14,7 @@ class MyScreenManager(ScreenManager):
     """
     pass
 
-class MyKivyApp(App):
+class MyApp(App):
     """
     Main Kivy Application
     """
@@ -26,4 +26,4 @@ class MyKivyApp(App):
         return sm
 
 if __name__ == "__main__":
-    MyKivyApp().run()
+    MyApp().run()
