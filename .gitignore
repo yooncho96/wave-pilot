@@ -1,0 +1,22 @@
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore virtual environment folders
+venv/
+env/
+.venv/
+
+# Ignore SSL certificates if you do not want them in the repo
+ssl/*.pem
+ssl/*.key
+ssl/*.crt
+
+# If using an .env file for secrets
+.env
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
