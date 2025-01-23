@@ -122,8 +122,9 @@ class DBHelper:
         )
         """
         self.cursor.execute(create_query)
+        if self.cursor.rowcount == 1:
+            self.entry = 0
         self.conn.commit()
-        self.entry = 0
 
     def insert_emotion_data(self, transcript, anger, sadness, fear, shame, guilt,
                             jealousy, envy, joy, love):
@@ -146,6 +147,9 @@ class DBHelper:
         data = (transcript, anger, sadness, fear, shame, guilt, jealousy, envy, joy, love)
         self.cursor.execute(insert_query, data)
         self.conn.commit()
+
+    def get_current_id(self):
+        return self.entry
 
     def get_top3_emotion_data(self):
         """
@@ -178,6 +182,17 @@ class DBHelper:
         self.conn.commit()
 
         return top3_emotions
+    
+    def get_all_emotion_data(self):
+        """
+        Fetch all rows from emotion_data.
+        """
+        table_name = f"emotion_data_{self.ID}"
+
+        # Fetch all rows from emotion_data.
+        select_query = f"SELECT * FROM {table_name}"
+        self.cursor.execute(select_query)
+        return self.cursor.fetchall()
 
     def adjust_emotion(self, feedback, adjustment):
         """

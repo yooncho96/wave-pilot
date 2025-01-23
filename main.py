@@ -5,8 +5,8 @@ from kivy.uix.screenmanager import ScreenManager
 
 # Import our screens
 from screens.home import HomeScreen
-from screens.record import SpeechScreen
-from screens.emotion_data import EmotionDataScreen
+from screens.voice_diary.assess_emotion.record import SpeechScreen
+from screens.voice_diary.assess_emotion.confirm_emotion import EmotionDataScreen
 
 class MyScreenManager(ScreenManager):
     """

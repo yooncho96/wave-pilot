@@ -4,9 +4,14 @@ import os
 import sys
 import openai
 import json
+import data.db_helper as db
 
 from dotenv import load_dotenv
 load_dotenv()
+
+AZURE_API_KEY = os.getenv("AZURE_API_KEY")
+AZURE_DEPLOYMENT_NAME = os.getenv("AZURE_DEPLOYMENT_NAME")
+AZURE_MODEL_NAME = os.getenv("AZURE_MODEL_NAME")
 
 def transcribe_audio_via_openai(audio_file_path: str) -> str:
     """
@@ -27,15 +32,13 @@ def transcribe_audio_via_openai(audio_file_path: str) -> str:
         print(f"Error during transcription: {e}", file=sys.stderr)
         return ""
 
-
 def get_emotion_scores(text: str) -> dict:
     """
     Sends text to Azure OpenAI with a prompt to identify 9 emotions on a 0-10 scale.
     Returns a dict like:
       { 'anger': 5.0, 'sadness': 3.0, ... }
     """
-    try:
-        prompt = (
+    prompt = (
             "Identify the severity of the following 9 emotions on a scale of 0 to 10, "
             "based on this text:\n\n"
             f"\"{text}\"\n\n"
@@ -53,7 +56,20 @@ def get_emotion_scores(text: str) -> dict:
             "  \"love\": <number>\n"
             "}"
         )
-
+    
+    if db.get_current_id() != 0:
+        previous_data = db.get_all_emotion_data()
+        additional_info = (
+            "For your information, the user's previous transcripts, AI analysis results, and corrections are here:\n"
+            f"{previous_data}\n"
+            "Fine tune the results accordingly."
+        )
+        prompt = prompt + additional_info
+        
+    else:
+        prompt = prompt
+    
+    try:
         response = openai.ChatCompletion.create(
             engine=AZURE_DEPLOYMENT_NAME,
             messages=[
@@ -67,7 +83,7 @@ def get_emotion_scores(text: str) -> dict:
         raw_text = response["choices"][0]["message"]["content"]
         scores = json.loads(raw_text)
 
-        # Safely convert to floats
+        # Safely convert to floats, rounded to 1 decimal place
         emotion_scores = {
             "anger": float(scores.get("anger", 0)),
             "sadness": float(scores.get("sadness", 0)),
