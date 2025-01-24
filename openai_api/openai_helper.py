@@ -57,7 +57,7 @@ def get_emotion_scores(text: str) -> dict:
             "}"
         )
     
-    if db.get_current_id() != 0:
+    if db.get_current_idx() > 1:
         previous_data = db.get_all_emotion_data()
         additional_info = (
             "For your information, the user's previous transcripts, AI analysis results, and corrections are here:\n"

@@ -16,6 +16,7 @@ Kivy-Garden==0.1.5
 mysql-connector-python==9.2.0
 numpy==2.2.2
 openai==1.60.0
+plyer==2.1.0
 pycparser==2.22
 pydantic==2.10.5
 pydantic_core==2.27.2

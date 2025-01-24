@@ -2,9 +2,10 @@
 
 import mysql.connector
 import os
+import json
+from user_db_helper import ID
 
 from dotenv import load_dotenv
-import json
 load_dotenv()
 
 DB_HOST = os.getenv('DB_HOST')
@@ -17,10 +18,9 @@ class DBHelper:
     """
     Manages database connection and queries using SSL.
     This database stores:
-     1) user information to use when logging in
-     2) emotion data from OpenAI for each user
-     3) data from check-in tab
-     4) log of user interactions for each user
+     1) emotion data from OpenAI for each user
+     2) data from check-in tab
+     3) log of user interactions for each user
     """
 
     def __init__(self):
@@ -33,74 +33,18 @@ class DBHelper:
             database=DB_NAME,
             port=DB_PORT
         )
-
         self.cursor = self.conn.cursor()
 
-        self.entry = 0
-
-    ## User data table
-
-    def create_user_table(self):
-        """
-        Example method to create a table if it doesn't exist.
-        Adjust the schema as needed.
-        """
-        create_query = """
-        CREATE TABLE IF NOT EXISTS user_data (
-            id INT,
-            password VARCHAR(50),
-            email VARCHAR(100),
-            phone VARCHAR(20),  # in format ###-###-####
-            street_address VARCHAR(255),
-            city VARCHAR(255),
-            state VARCHAR(2),
-            zip_code VARCHAR(5),
-            crisis_name VARCHAR(100),
-            crisis_phone VARCHAR(20),   # in format ###-###-####
-        )
-        """
-        
-        self.cursor.execute(create_query)
-        self.conn.commit()
-        
-    def set_pw(self, id, password):     # user will set the pw; other fields will be set by admin
-        """
-        User sets password.
-        """
-        update_query = "UPDATE user_data SET password = %s WHERE id = %s"
-        self.cursor.execute(update_query, (password, id))
-        self.conn.commit()
-        self.ID = id
-
-    def lost_pw_email(self, id):     # find user that has id -> return email
-        """
-        Reset pw when lost.
-        """
-        select_query = "SELECT email FROM user_data WHERE id = (%s)"
-        self.cursor.execute(select_query, (id,))
-        
-        return self.cursor.fetchall(), id
-
-    def reset_pw(self, password):
-        update_query = "UPDATE user_data SET password = %s WHERE id = %s"
-        self.cursor.execute(update_query, (password, self.ID))
-        self.conn.commit()
-
-    def get_all_user_data(self):
-        """
-        Fetch all data from table.
-        """
-        select_query = "SELECT * FROM user_data WHERE id = (self.ID)"
-        self.cursor.execute(select_query)
-        return self.cursor.fetchall()
-    
+        global emotion_list 
+        emotion_list = ['anger', 'sadness', 'fear', 'shame', 'guilt', 'jealousy', 'envy', 'joy', 'love']
+            
     ## emotion data table
     ## unique table for each user
     def create_emotion_table(self):
         """
         Creates a table to store transcripts and emotion scores.
         """
-        table_name = f"emotion_data_{self.ID}"
+        table_name = f"emotion_data_{ID}"
 
         create_query = f"""
         CREATE TABLE IF NOT EXISTS {table_name} (
@@ -116,14 +60,12 @@ class DBHelper:
             envy FLOAT,
             joy FLOAT,
             love FLOAT,
-            top3 JSON,
+            sorted JSON,
             correct BOOLEAN,
-            adjusted_top3 JSON
+            adjusted_main JSON
         )
         """
         self.cursor.execute(create_query)
-        if self.cursor.rowcount == 1:
-            self.entry = 0
         self.conn.commit()
 
     def insert_emotion_data(self, transcript, anger, sadness, fear, shame, guilt,
@@ -131,89 +73,124 @@ class DBHelper:
         """
         Insert a row into the emotion_data table.
         """
-        self.entry = self.entry + 1
-
-        table_name = f"emotion_data_{self.ID}"
         select_query = "SELECT NOW()"
         self.cursor.execute(select_query)
         timestamp = self.cursor.fetchall()
-        correct = True if correct else False
 
-        insert_query = f"""
-        INSERT INTO {table_name} ({timestamp}, transcript, anger, sadness, fear, shame, guilt, jealousy, envy, joy, love, top3, correct, adjusted_top3)
-        VALUES
-            ({timestamp}, transcript, anger, sadness, fear, shame, guilt, jealousy, envy, joy, love, NULL, correct, NULL)
+        insert_query = """
+            INSERT INTO %s (
+                timestamp,
+                transcript,
+                anger,
+                sadness,
+                fear,
+                shame,
+                guilt,
+                jealousy,
+                envy,
+                joy,
+                love,
+                sorted,
+                correct,
+                adjusted_main
+            )
+            VALUES (
+                %s,   -- timestamp
+                %s,   -- transcript
+                %s,   -- anger
+                %s,   -- sadness
+                %s,   -- fear
+                %s,   -- shame
+                %s,   -- guilt
+                %s,   -- jealousy
+                %s,   -- envy
+                %s,   -- joy
+                %s,   -- love
+                %s, -- sorted
+                NULL, -- correct (forcing NULL)
+                NULL  -- adjusted_top3 (forcing NULL)
+            )
         """
-        data = (transcript, anger, sadness, fear, shame, guilt, jealousy, envy, joy, love)
-        self.cursor.execute(insert_query, data)
+        data = (timestamp, transcript, anger, sadness, fear, shame, guilt, jealousy, envy, joy, love)
+        sorted_emotions = sorted(enumerate(data[2:]), key=lambda x: x[1], reverse=True)
+        sorted_dict = {emotion_list[i]: data[1:][i] for i, _ in sorted_emotions}
+        sorted_json = json.dumps(sorted_dict)
+
+        data = data + (sorted_json,)
+
+        self.cursor.execute(insert_query % f"emotion_data_{ID}", (data,))
         self.conn.commit()
 
-    def get_current_id(self):
-        return self.entry
+    def get_current_idx(self):
+        select_query = "SELECT id FROM %s ORDER BY id DESC LIMIT 1"
+        self.cursor.execute(select_query, (f"emotion_data_{ID}",))
+        idx = self.cursor.fetchall()[0][0]
+        return idx
 
-    def get_top3_emotion_data(self):
+    def get_emotion_data(self):
         """
-        Fetch the top 3 emotions from the latest entry in the emotion_data table.
+        Fetch the all emotions (SORTED) from the latest entry in the emotion_data table.
         """
-        table_name = f"emotion_data_{self.ID}"
+        idx=self.get_current_idx()
+        select_query = "SELECT sorted FROM %s WHERE id = %s"
+        self.cursor.execute(select_query % f"emotion_data_{ID}", (idx,))
+        sorted_json = self.cursor.fetchall()[0][0]
+        sorted_dict = json.loads(sorted_json)
 
-        # Fetch all rows from emotion_data.
-        select_query = f"""
-            SELECT anger, sadness, fear, shame, guilt, jealousy, envy, joy, love 
-            FROM {table_name}
-            WHERE id = {self.entry}
-            """
-        self.cursor.execute(select_query)
-        full_data = self.cursor.fetchall()[-1]  # list of tuples (each tuple=row); last entry
-
-        # retrieve top 3 emotions as list of ([name],[score])
-        emotion_order = ['anger', 'sadness', 'fear', 'shame', 'guilt', 'jealousy', 'envy', 'joy', 'love']
-        sorted_emotions = sorted(enumerate(full_data), key=lambda x: x[1], reverse=True)[:3]
-        top3_emotions = [(emotion_order[i], score) for i, score in sorted_emotions]
-
-        top3_json = json.dumps(top3_emotions)
-
-        update_query = f"""
-            UPDATE {table_name}
-            SET top3 = %s
-            WHERE id = {self.entry}
-            """
-        self.cursor.execute(update_query, (top3_json,))
-        self.conn.commit()
-
-        return top3_emotions
+        return sorted_dict
     
     def get_all_emotion_data(self):
         """
         Fetch all rows from emotion_data.
         """
-        table_name = f"emotion_data_{self.ID}"
-
         # Fetch all rows from emotion_data.
-        select_query = f"SELECT * FROM {table_name}"
-        self.cursor.execute(select_query)
+        select_query = "SELECT * FROM %s"
+        self.cursor.execute(select_query, (f"emotion_data_{ID}",))
+
         return self.cursor.fetchall()
 
-    def adjust_emotion(self, feedback, adjustment):
+    def save_feedback(self, correct):
+        """
+        Save user feedback on emotion scores.
+        """
+        idx=self.get_current_idx()
+        update_query = """
+            UPDATE %s
+            SET correct = %s
+            WHERE id = %s
+            """
+        self.cursor.execute(update_query % f"emotion_data_{ID}"(correct, idx))
+        self.conn.commit()
+
+    def adjust_emotion(self, adjustment):   
         """
         Update emotion scores based on user feedback.
+        `adjustment` is a tuple of (name, value)
         """
-        table_name = f"emotion_data_{self.ID}"
+        idx=self.get_current_idx()
+        self.save_feedback(False)
+        adjustment_json = json.dumps(adjustment)
 
-        if feedback == "correct":
-            correct = True
-        else:
-            correct = False
-            adjustment_json = json.dumps(adjustment)
-            update_query = f"""
-                UPDATE {table_name}
-                SET correct = %s, adjusted_top3 = %s
-                WHERE id = {self.entry}
-                """
-            self.cursor.execute(update_query, (correct, adjustment_json,))
-            self.conn.commit()
+        update_query = """
+            UPDATE %s
+            SET adjusted_main = %s
+            WHERE id = %s
+            """
+        self.cursor.execute(update_query % f"emotion_data_{ID}", (adjustment_json, idx))
+        self.conn.commit()
 
         return adjustment
+    
+    def get_adjusted_main(self):
+        """
+        Fetch the adjusted emotion scores from the latest entry in the emotion_data table.
+        """
+        idx=self.get_current_idx()
+        select_query = "SELECT adjusted_main FROM %s WHERE id = %s"
+        self.cursor.execute(select_query % f"emotion_data_{ID}", (idx,))
+        adjusted_main_json = self.cursor.fetchall()[0][0]
+        adjusted_main = json.loads(adjusted_main_json)
+        return adjusted_main
     
     ## check-in data table
     ## unique table for each user
@@ -221,10 +198,8 @@ class DBHelper:
         """
         Creates a table to store check-in data.
         """
-        table_name = f"checkin_data_{self.ID}"
-
-        create_query = f"""
-        CREATE TABLE IF NOT EXISTS {table_name} (
+        create_query = """
+        CREATE TABLE IF NOT EXISTS %s (
             id INT AUTO_INCREMENT PRIMARY KEY,
             timestamp TIMESTAMP,
             mindfulness TEXT,
@@ -239,7 +214,7 @@ class DBHelper:
             PLEASE_Exercise BOOLEAN
         )
         """
-        self.cursor.execute(create_query)
+        self.cursor.execute(create_query, (f"checkin_data_{ID}",))
         self.conn.commit()
     
     def insert_checkin_data(self, mindfulness, diary, ABC_A, ABC_B, ABC_C, 
@@ -248,23 +223,39 @@ class DBHelper:
         """
         Insert a row into the checkin_data table.
         """
-        table_name = f"checkin_data_{self.ID}"
-
         select_query = "SELECT NOW()"
         self.cursor.execute(select_query)
         timestamp = self.cursor.fetchall()
 
-        insert_query = f"""
-        INSERT INTO {table_name} ({timestamp}, mindfulness, diary, ABC_A, ABC_B, ABC_C, 
-                            PLEASE_Physical_iLlness, PLEASE_balanced_Eating, 
-                            PLEASE_mood_Altering_substances, PLEASE_Sleep, PLEASE_Exercise)
-        VALUES ({timestamp}, mindfulness, diary, ABC_A, ABC_B, ABC_C, 
-                            PLEASE_Physical_iLlness, PLEASE_balanced_Eating, 
-                            PLEASE_mood_Altering_substances, PLEASE_Sleep, PLEASE_Exercise)
+        insert_query = """
+        INSERT INTO %s (
+            timestamp, 
+            mindfulness, 
+            diary, 
+            ABC_A, ABC_B, ABC_C, 
+            PLEASE_Physical_iLlness, PLEASE_balanced_Eating, PLEASE_mood_Altering_substances, PLEASE_Sleep, PLEASE_Exercise
+        )
+        VALUES (
+            %s,     -- timestamp, 
+            %s,     -- mindfulness, 
+            %s,     -- diary, 
+            %s,     -- ABC_A, 
+            %s,     -- ABC_B, 
+            %s,     -- ABC_C, 
+            %s,     -- PLEASE_Physical_iLlness, 
+            %s,     -- PLEASE_balanced_Eating, 
+            %s,     -- PLEASE_mood_Altering_substances, 
+            %s,     -- PLEASE_Sleep, 
+            %s,     -- PLEASE_Exercise
+        )
         """
-        data = (mindfulness, diary, ABC_A, ABC_B, ABC_C, 
-                            PLEASE_Physical_iLlness, PLEASE_balanced_Eating, 
-                            PLEASE_mood_Altering_substances, PLEASE_Sleep, PLEASE_Exercise)
+        data = (
+            f"checkin_data_{ID}",
+            timestamp,
+            mindfulness, diary, ABC_A, ABC_B, ABC_C, 
+            PLEASE_Physical_iLlness, PLEASE_balanced_Eating, 
+            PLEASE_mood_Altering_substances, PLEASE_Sleep, PLEASE_Exercise
+        )
         self.cursor.execute(insert_query, data)
         self.conn.commit()
 
@@ -272,11 +263,9 @@ class DBHelper:
         """
         Fetch all rows from checkin_data.
         """
-        table_name = f"checkin_data_{self.ID}"
-
         # Fetch all rows from checkin_data.
-        select_query = f"SELECT * FROM {table_name}"
-        self.cursor.execute(select_query)
+        select_query = "SELECT * FROM %s"
+        self.cursor.execute(select_query, (f"checkin_data_{ID}",))
         return self.cursor.fetchall()
 
     ## store user interactions
@@ -285,28 +274,25 @@ class DBHelper:
         """
         Creates a table to store user interactions.
         """
-        table_name = f"log_data_{self.ID}"
-        create_query = f"""
-        CREATE TABLE IF NOT EXISTS {table_name} (
+        create_query = """
+        CREATE TABLE IF NOT EXISTS %s (
             id INT AUTO_INCREMENT PRIMARY KEY,
             action VARCHAR(255),
             details TEXT
         )
         """
-        self.cursor.execute(create_query)
+        self.cursor.execute(create_query, (f"log_data_{ID}",))
         self.conn.commit()
 
     def insert_log_data(self, action, details):
         """
         Insert a row into the log_data table.
         """
-        table_name = f"log_data_{self.ID}"
-
-        insert_query = f"""
-        INSERT INTO {table_name} (action, details)
-        VALUES (%s, %s)
+        insert_query = """
+        INSERT INTO %s (action, details)
+            VALUES (%s, %s)
         """
-        data = (action, details)
+        data = (f"log_data_{ID}",action, details)
         self.cursor.execute(insert_query, data)
         self.conn.commit()
 

@@ -4,52 +4,62 @@ from kivy.uix.screenmanager import Screen, SlideTransition
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
+from kivy.uix.slider import Slider
 
 from data.db_helper import DBHelper
+from data.db_helper import emotion_list
 
-class EmotionDataScreen(Screen):
-    """
-    Screen to display all stored emotion data (ID, transcript, and emotion scores).
-    """
+class ConfirmEmotionScreen (Screen):
+
     def __init__(self, **kwargs):
-        super(EmotionDataScreen, self).__init__(**kwargs)
-
+        super(ConfirmEmotionScreen, self).__init__(**kwargs)
         self.layout = BoxLayout(orientation='vertical', padding=20, spacing=10)
-        self.data_label = Label(text="No data loaded yet.", font_size=14)
-        self.layout.add_widget(self.data_label)
 
-        refresh_btn = Button(text="Refresh Data", size_hint=(1, 0.1))
-        refresh_btn.bind(on_release=self.load_data)
-        self.layout.add_widget(refresh_btn)
-
-        back_btn = Button(text="Back to Home", size_hint=(1, 0.1))
-        back_btn.bind(on_release=self.go_back_home)
-        self.layout.add_widget(back_btn)
-
-        self.add_widget(self.layout)
-
-    def load_data(self, instance):
+    def confirm(self, instance):
         db = DBHelper()
-        db.create_emotion_table()
-        rows = db.get_all_emotion_data()
+        first_try = db.get_emotion_data()
         db.close()
 
-        lines = []
-        for row in rows:
-            row_id, transcript, anger, sadness, fear, shame, guilt, jealousy, envy, joy, love = row
-            line = (
-                f"ID: {row_id}\n"
-                f"Transcript: {transcript}\n"
-                f"anger={anger}, sadness={sadness}, fear={fear}, shame={shame}, guilt={guilt}\n"
-                f"jealousy={jealousy}, envy={envy}, joy={joy}, love={love}"
-            )
-            lines.append(line + "\n" + "-"*50)
+        sorted_emotions = [x for x in first_try.keys()]
 
-        if lines:
-            self.data_label.text = "\n\n".join(lines)
-        else:
-            self.data_label.text = "No data found."
+        message = f"""
+            I sense these emotions in your voice diary.\n
+            Let me know if you feel a bit differently.
+            """
+        self.layout.add_widget(Label(text=message))
 
-    def go_back_home(self, instance):
-        self.manager.transition = SlideTransition(direction="right")
-        self.manager.current = "home_screen"
+        top3_emotions = {
+            sorted_emotions[0]: first_try[sorted_emotions[0]],
+            sorted_emotions[1]: first_try[sorted_emotions[1]],
+            sorted_emotions[2]: first_try[sorted_emotions[2]]
+        }
+        for emotion, value in top3_emotions.items():
+            emotion_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=40)
+            emotion_label = Label(text=emotion, size_hint_x=0.5)
+            emotion_slider = Slider(min=0, max=10, value=value, size_hint_x=0.5)
+            emotion_layout.add_widget(emotion_label)
+            emotion_layout.add_widget(emotion_slider)
+            self.layout.add_widget(emotion_layout)
+
+        # Buttons to confirm or deny emotion
+        confirm_btn = Button(text="Confirm", size_hint=(1, 0.1))
+        confirm_btn.bind(on_release=self.next())
+        self.layout.add_widget(confirm_btn)
+
+        deny_btn = Button(text="Deny", size_hint=(1, 0.1))
+        deny_btn.bind(on_release=self.adjust())
+        self.layout.add_widget(deny_btn)
+
+    def next(self, instance):
+        db = DBHelper()
+        db.save_feedback(True)
+        db.close()
+        self.manager.transition = SlideTransition(direction="left")
+        self.manager.current = "screens/voice_diary/skill_willingness"
+        
+    def adjust(self, instance):
+        db = DBHelper()
+        db.save_feedback(False)
+        db.close()
+        self.manager.transition = SlideTransition(direction="left")
+        self.manager.current = "screens/voice_diary/adjust_emotion"
