@@ -9,9 +9,11 @@ from data.db_helper import DBHelper
 from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
 
-class MindfulnessScreen(Screen):
+import json
+
+class UpdateMindfulness(Screen):
     def __init__(self, **kwargs):
-        super(MindfulnessScreen, self).__init__(**kwargs)
+        super(UpdateMindfulness, self).__init__(**kwargs)
         
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
         
@@ -19,7 +21,7 @@ class MindfulnessScreen(Screen):
         layout.add_widget(title)
         
         description = Label(
-            text="We'd like to get a sense of what skills work best for you. Can you pick some of your favorite mindfulness skills from those listed below?",
+            text="I see you've had a change of taste! Feel free to edit your choices.",
             size_hint_y=None, height=100
         )
         layout.add_widget(description)
@@ -35,29 +37,14 @@ class MindfulnessScreen(Screen):
         
         self.add_widget(layout)
 
+        db = DBHelper()
+        self.past_selections = db.get_mindfulness()
+        db.close()
         self.selected_list = []
-    
-    def show_dropdown(self, instance):
-        dropdown = DropDown()
-        
-        if instance.text == "Breathing exercises":
-            options = ["Paced breathing", "Box breathing", "Focusing on exhales", "Counting down from 10"]
-        elif instance.text == "Observe and Describe":
-            options = ["Narrate a task", "Blindfolded movement/taste", "Search for that color", "Search for that shape", "Learning from an animal friend", "5-4-3-2-1"]
-        elif instance.text == "Participate":
-            options = ["Coloring", "Doodling", "Taking a walk", "Cooking", "Dancing", "Puzzles", "Mindful eating"]
-        elif instance.text == "Mediation and self-reflection":
-            options = ["Light a candle", "Body Scan", "Set up mantras", "Journaling", "List of Gratitude"]
-        elif instance.text == "Something else":
-            options = ["Something else in mind?"]
-        
-        for option in options:
-            btn = Button(text=option, size_hint_y=None, height=44)
-            btn.bind(on_release=lambda btn: dropdown.select(btn.text))
-            dropdown.add_widget(btn)
-        
-        dropdown.bind(on_select=lambda instance, x: self.change(instance, x, instance.text))
-        self.dropdown = dropdown
+        for key, value in self.past_selections:
+            if value:
+                self.add_tag(key)
+                self.selected_list.append(key)
 
     def add_tag(self, skill):
         # Create a tag for the selected option
@@ -75,15 +62,42 @@ class MindfulnessScreen(Screen):
             self.add_widget(self.tag_box, index=1)  # Add the tag box layout under the title
 
         self.tag_box.add_widget(tag_layout)
+    
+    def show_dropdown(self, instance):
+        dropdown = DropDown()
+
+        if instance.text == "Breathing exercises":
+            options = ["Paced breathing", "Box breathing", "Focusing on exhales", "Counting down from 10"]
+        elif instance.text == "Observe and Describe":
+            options = ["Narrate a task", "Blindfolded movement/taste", "Search for that color", "Search for that shape", "Learning from an animal friend", "5-4-3-2-1"]
+        elif instance.text == "Participate":
+            options = ["Coloring", "Doodling", "Taking a walk", "Cooking", "Dancing", "Puzzles", "Mindful eating"]
+        elif instance.text == "Mediation and self-reflection":
+            options = ["Light a candle", "Body Scan", "Set up mantras", "Journaling", "List of Gratitude"]
+        elif instance.text == "Something else":
+            options = [x.replace('Other_', '') for x in self.past_selections if 'Other_' in x] + ['Something else in mind?']
+        
+        for option in options:
+            btn = Button(text=option, size_hint_y=None, height=44)
+            if option in self.past_selections.keys():
+                btn.background_color = (0.39, 0.58, 0.93, 1)  # Light cornflower blue
+            btn.bind(on_release=lambda btn: dropdown.select(btn.text))
+            dropdown.add_widget(btn)
+        
+        dropdown.bind(on_select=lambda instance, x: self.change(instance, x, instance.text))
+        self.dropdown = dropdown
 
     def change(self, instance, skill):
         if instance.background_color == [0.39, 0.58, 0.93, 1]:  # Light cornflower blue = was selected before
             instance.background_color = [1, 1, 1, 1]  # Reset to white = unselect
+            self.selected_list.remove(skill)
             for child in self.tag_box.children[:]:
                 if isinstance(child, BoxLayout) and child.children[1].text == skill:
                     self.tag_box.remove_widget(child)
         else:       # was not selected before
             instance.background_color = [0.39, 0.58, 0.93, 1]  # Light cornflower blue = select
+            self.selected_list.append(skill)
+            self.add_tag(skill)
 
         if skill == "Something else in mind?":
             # Open a popup with a text input for the user to enter their own skill
@@ -98,10 +112,6 @@ class MindfulnessScreen(Screen):
                   content=box,
                   size_hint=(0.8, 0.3))
             popup.open()
-        else:
-            self.selected_list = []
-            self.selected_list.append(skill)
-            self.add_tag(skill)
 
     def remove_tag(self, tag_layout, skill):
         self.remove_widget(tag_layout)
@@ -110,10 +120,16 @@ class MindfulnessScreen(Screen):
     def go_next(self, instance):
         if len(self.selected_list) >= 3:
             db = DBHelper()
-            db.create_mindfulness_table()
             db.set_preferred_mindfulness(self.selected_list)
             db.close()
-            self.manager.current = "take_DistressTol_skill"
+
+            done_btn = Button(text="Done", size_hint_y= None, width=100)
+            done_btn.bind(on_release=popup.dismiss())
+            popup = Popup(title="I'll keep your selection in mind!",
+                          content=done_btn,
+                          size_hint=(0.8, 0.3))
+            
+            self.manager.current = "screens/home"
         else:
             done_btn = Button(text="Done", size_hint_y= None, width=100)
             done_btn.bind(on_release=popup.dismiss())

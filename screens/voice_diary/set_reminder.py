@@ -4,6 +4,7 @@ from kivy.uix.label import Label
 from kivy.uix.spinner import Spinner
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
+from kivy.uix.popup import Popup
 
 import calendar
 import datetime
@@ -86,5 +87,14 @@ class SetReminderScreen(Screen):
     def on_set(self, instance):
         date_str, time_str = self.get_chosen_datetime()
         self.schedule_notification(date_str, time_str)
+        popup_content = BoxLayout(orientation='vertical', padding=10, spacing=10)
+        popup_content.add_widget(Label(text="Stay safe, and talk to you later."))
+
+        close_button = Button(text="OK", size_hint=(1, 0.2))
+        popup_content.add_widget(close_button)
+
+        popup = Popup(title="Reminder Set", content=popup_content, size_hint=(0.8, 0.4))
+        close_button.bind(on_release=popup.dismiss)
+        popup.open()
         self.manager.transition = SlideTransition(direction="left")
         self.manager.current = "home_screen"

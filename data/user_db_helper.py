@@ -45,12 +45,14 @@ class UserHelper:
             state VARCHAR(2),
             zip_code VARCHAR(5),
             crisis_name VARCHAR(100),
+            crisis_relationship VARCHAR(100),
             crisis_phone VARCHAR(20)   # in format ###-###-####
         )
         """
-
         self.cursor.execute(create_query)
         self.conn.commit()
+        global ID 
+        ID = None
         
     def set_pw(self, id, password):     # user will set the pw; other fields will be set by admin
         """
@@ -59,24 +61,35 @@ class UserHelper:
         update_query = "UPDATE user_data SET password = %s WHERE id = %s"
         self.cursor.execute(update_query, (password, id))
         self.conn.commit()
-        global ID 
         ID = id
 
-    def lost_pw_email(self):     # find user that has id -> return email
+    def find_matching_user(self, id, email):
         """
-        Reset pw when lost.
+        find user that has id & email, return boolean
         """
-        ID = None
         select_query = "SELECT email FROM user_data WHERE id = (%s)"
         self.cursor.execute(select_query, (id,))
-        
-        return self.cursor.fetchall(), id
+        true_email = self.cursor.fetchall()[0][0]
+        if email == true_email:
+            ID = id
+            return True
+        else:
+            return False
 
-    def reset_pw(self,password):
+    def reset_code(self,code):
         ID = self.lost_pw_email()[1]
-        update_query = "UPDATE user_data SET password = %s WHERE id = {ID}"
-        self.cursor.execute(update_query, (password, ))
+        update_query = "UPDATE user_data SET code = %s WHERE id = {ID}"
+        self.cursor.execute(update_query, (code, ))
         self.conn.commit()
+
+    def login(self, code):
+        select_query = "SELECT code FROM user_data WHERE id = {ID}"
+        self.cursor.execute(select_query)
+        true_code = self.cursor.fetchall()[0][0]
+        if code == true_code:
+            return True
+        else:
+            return False
 
     def set_code(self, code):
         """
@@ -86,6 +99,11 @@ class UserHelper:
         self.cursor.execute(update_query, (code, ))
         self.conn.commit()
 
+    def get_password(self):
+        select_query = "SELECT password FROM user_data WHERE id = {ID}"
+        self.cursor.execute(select_query)
+        return self.cursor.fetchall()[0][0]
+    
     def get_user_data(self):
         """
         Fetch all data from table.
@@ -93,6 +111,14 @@ class UserHelper:
         select_query = f"SELECT * FROM user_data WHERE id = {ID}"
         self.cursor.execute(select_query)
         return self.cursor.fetchall()
+    
+    def set_crisis_contact(self, name, relationship, phone):
+        """
+        Set crisis contact for user.
+        """
+        update_query = "UPDATE user_data SET crisis_name = %s, crisis_relationship = %s, crisis_phone = %s WHERE id = {ID}"
+        self.cursor.execute(update_query, (name, relationship, phone))
+        self.conn.commit()
     
     def close(self):
         """

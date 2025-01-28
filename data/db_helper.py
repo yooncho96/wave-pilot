@@ -192,6 +192,127 @@ class DBHelper:
         adjusted_main = json.loads(adjusted_main_json)
         return adjusted_main
     
+    ## store selected skills data table
+    ## unique table for each user
+    def create_mindfulness_table(self):
+        """
+        Creates a table to store selected mindfulness skills data.
+        """
+        create_query = """
+        CREATE TABLE IF NOT EXISTS %s (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            timestamp TIMESTAMP,
+            Paced_breathing BOOLEAN,
+            Box_breathing BOOLEAN,
+            Focusing_on_exhales BOOLEAN,
+            Counting_down_from_10 BOOLEAN,
+            Narrate_a_task BOOLEAN,
+            Blindfolded_movement_taste BOOLEAN,
+            Mindful_eating BOOLEAN,
+            Search_for_that_color BOOLEAN,
+            Search_for_that_shape BOOLEAN,
+            Learning_from_an_animal_friend BOOLEAN,
+            5_4_3_2_1 BOOLEAN,
+            Coloring BOOLEAN,
+            Doodling BOOLEAN,
+            Taking_a_walk BOOLEAN,
+            Cooking BOOLEAN,
+            Dancing BOOLEAN,
+            Puzzles BOOLEAN,
+            Light_a_candle BOOLEAN,
+            Body_Scan BOOLEAN,
+            Set_up_mantras BOOLEAN,
+            Journaling BOOLEAN,
+            List_of_Gratitude BOOLEAN,
+            Other TEXT
+        )
+        """
+        self.cursor.execute(create_query, (f"mindfulness_skills_{ID}",))
+        self.conn.commit()
+
+    def set_preferred_mindfulness(self, skill_list):
+        """
+        Add selected skill to list of preferred skills saved in mindfulness.
+        """
+        table_name = f"mindfulness_skills_{ID}"
+
+        select_query = "SELECT NOW()"
+        self.cursor.execute(select_query)
+        timestamp = self.cursor.fetchall()
+
+        for skill in skill_list:
+            if skill not in self.cursor.column_names:
+                alter_query = "ALTER TABLE %s ADD COLUMN %s BOOLEAN"
+                skill = f"Other_{skill}"
+                self.cursor.execute(alter_query % {table_name}, (skill,))
+        
+        columns = self.cursor.column_names
+        values = [True if col in skill_list else False for col in columns]
+        insert_query = f"INSERT INTO %s (timestamp, {', '.join(columns)}) VALUES (%s, {', '.join(['%s'] * len(columns))}))"
+        self.cursor.execute(insert_query % {table_name}, ((timestamp,) + values,))
+        self.conn.commit()
+
+    def get_mindfulness(self):
+        """
+        Get latest entry of `mindfulness`
+        """
+        table_name = f"mindfulness_skills_{ID}"
+        select_query = "SELECT * FROM %s ORDER BY id DESC LIMIT 1"
+        self.cursor.execute(select_query % {table_name})
+        columns = [desc[0] for desc in self.cursor.description]
+        row = self.cursor.fetchone()
+        result = dict(zip(columns, row))
+        return result
+    
+    def create_distress_tolerance_table(self):
+        """
+        Creates a table to store selected distress tolerance skills data.
+        """
+        create_query = """
+        CREATE TABLE IF NOT EXISTS %s (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            timestamp TIMESTAMP,
+            
+            Other TEXT
+        )
+        """
+        self.cursor.execute(create_query, (f"distress_tolerance_{ID}",))
+        self.conn.commit()
+
+    def set_preferred_distress_tolerance(self, skill_list):
+        """
+        Add selected skill to list of preferred skills saved in distress_tolerance.
+        """
+        table_name = f"distress_tolerance_{ID}"
+
+        select_query = "SELECT NOW()"
+        self.cursor.execute(select_query)
+        timestamp = self.cursor.fetchall()
+
+        for skill in skill_list:
+            if skill not in self.cursor.column_names:
+                alter_query = "ALTER TABLE %s ADD COLUMN %s BOOLEAN"
+                skill = f"Other_{skill}"
+                self.cursor.execute(alter_query % {table_name}, (skill,))
+        
+        columns = self.cursor.column_names
+        values = [True if col in skill_list else False for col in columns]
+        insert_query = f"INSERT INTO %s (timestamp, {', '.join(columns)}) VALUES (%s, {', '.join(['%s'] * len(columns))}))"
+        self.cursor.execute(insert_query % {table_name}, ((timestamp,) + values,))
+        self.conn.commit()
+
+    def get_distress_tolerance(self):
+        """
+        Get latest entry of `distress_tolerance`
+        """
+        table_name = f"distress_tolerance_{ID}"
+        select_query = "SELECT * FROM %s ORDER BY id DESC LIMIT 1"
+        self.cursor.execute(select_query % {table_name})
+        columns = [desc[0] for desc in self.cursor.description]
+        row = self.cursor.fetchone()
+        result = dict(zip(columns, row))
+        return result
+
     ## check-in data table
     ## unique table for each user
     def create_checkin_table(self):
