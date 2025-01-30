@@ -79,7 +79,7 @@ class UpdateMindfulness(Screen):
         
         for option in options:
             btn = Button(text=option, size_hint_y=None, height=44)
-            if option in self.past_selections.keys():
+            if option.replace(" ", "_") in self.past_selections.keys():
                 btn.background_color = (0.39, 0.58, 0.93, 1)  # Light cornflower blue
             btn.bind(on_release=lambda btn: dropdown.select(btn.text))
             dropdown.add_widget(btn)
@@ -90,13 +90,13 @@ class UpdateMindfulness(Screen):
     def change(self, instance, skill):
         if instance.background_color == [0.39, 0.58, 0.93, 1]:  # Light cornflower blue = was selected before
             instance.background_color = [1, 1, 1, 1]  # Reset to white = unselect
-            self.selected_list.remove(skill)
+            self.selected_list.remove(skill.replace(" ", "_"))
             for child in self.tag_box.children[:]:
                 if isinstance(child, BoxLayout) and child.children[1].text == skill:
                     self.tag_box.remove_widget(child)
         else:       # was not selected before
             instance.background_color = [0.39, 0.58, 0.93, 1]  # Light cornflower blue = select
-            self.selected_list.append(skill)
+            self.selected_list.append(skill.replace(" ", "_"))
             self.add_tag(skill)
 
         if skill == "Something else in mind?":
@@ -115,7 +115,7 @@ class UpdateMindfulness(Screen):
 
     def remove_tag(self, tag_layout, skill):
         self.remove_widget(tag_layout)
-        self.selected_list.remove(skill)
+        self.selected_list.remove(skill.replace(" ", "_"))
 
     def go_next(self, instance):
         if len(self.selected_list) >= 3:
@@ -125,11 +125,11 @@ class UpdateMindfulness(Screen):
 
             done_btn = Button(text="Done", size_hint_y= None, width=100)
             done_btn.bind(on_release=popup.dismiss())
-            popup = Popup(title="I'll keep your selection in mind!",
+            popup = Popup(title="I'll keep your selections in mind!",
                           content=done_btn,
                           size_hint=(0.8, 0.3))
             
-            self.manager.current = "screens/home"
+            self.manager.current = self.manager.previous()
         else:
             done_btn = Button(text="Done", size_hint_y= None, width=100)
             done_btn.bind(on_release=popup.dismiss())

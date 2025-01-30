@@ -8,6 +8,7 @@ from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 from data.user_db_helper import UserHelper
+from screens.initial.set_passcode import SetPasscodeScreen
 
 class SignUpScreen(Screen):
     def __init__(self, **kwargs):
@@ -96,4 +97,4 @@ class SignUpScreen(Screen):
         popup.dismiss()
 
     def landing(self):
-        self.manager.current = 'set_passcode'
+        self.manager.current = SetPasscodeScreen

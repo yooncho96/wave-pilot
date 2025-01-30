@@ -7,6 +7,7 @@ from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 
 from data.user_db_helper import UserHelper
+from screens.initial.signup import SignUpScreen
 from kivy.uix.popup import Popup
 
 class LoginScreen(Screen):
@@ -93,4 +94,4 @@ class LoginScreen(Screen):
 
     def goto_signup(self, popup):
         popup.dismiss()
-        self.manager.current = 'screens/initial/signup'
+        self.manager.current = SignUpScreen

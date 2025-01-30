@@ -192,6 +192,15 @@ class DBHelper:
         adjusted_main = json.loads(adjusted_main_json)
         return adjusted_main
     
+    def get_final_key_emotion(self):
+        emotions = self.get_emotion_data()
+        if emotions[12]:
+            emotion, score = emotions[11].items()[0]
+        else:
+            adjusted = self.get_adjusted_main()
+            emotion, score = adjusted.items()[0]
+        return emotion, score
+    
     ## store selected skills data table
     ## unique table for each user
     def create_mindfulness_table(self):
@@ -223,8 +232,7 @@ class DBHelper:
             Body_Scan BOOLEAN,
             Set_up_mantras BOOLEAN,
             Journaling BOOLEAN,
-            List_of_Gratitude BOOLEAN,
-            Other TEXT
+            List_of_Gratitude BOOLEAN
         )
         """
         self.cursor.execute(create_query, (f"mindfulness_skills_{ID}",))
@@ -272,8 +280,17 @@ class DBHelper:
         CREATE TABLE IF NOT EXISTS %s (
             id INT AUTO_INCREMENT PRIMARY KEY,
             timestamp TIMESTAMP,
-            
-            Other TEXT
+            TIPP_skills_Temperature_Ice_diving BOOLEAN, 
+            TIPP_skills_Intense_exercise BOOLEAN, 
+            TIPP_skills_Paced_breathing BOOLEAN,
+            TIPP_skills_Progressive_muscle_relaxation BOOLEAN,
+            STOP BOOLEAN,
+            SelfSoothing_Sight TEXT,
+            SelfSoothing_Sound TEXT,
+            SelfSoothing_Touch TEXT,
+            SelfSoothing_Smell TEXT,
+            SelfSoothing_Taste TEXT,
+            Pros_and_Cons BOOLEAN
         )
         """
         self.cursor.execute(create_query, (f"distress_tolerance_{ID}",))
@@ -289,13 +306,12 @@ class DBHelper:
         self.cursor.execute(select_query)
         timestamp = self.cursor.fetchall()
 
+        columns = self.cursor.column_names
         for skill in skill_list:
-            if skill not in self.cursor.column_names:
+            if skill not in columns:
                 alter_query = "ALTER TABLE %s ADD COLUMN %s BOOLEAN"
-                skill = f"Other_{skill}"
                 self.cursor.execute(alter_query % {table_name}, (skill,))
         
-        columns = self.cursor.column_names
         values = [True if col in skill_list else False for col in columns]
         insert_query = f"INSERT INTO %s (timestamp, {', '.join(columns)}) VALUES (%s, {', '.join(['%s'] * len(columns))}))"
         self.cursor.execute(insert_query % {table_name}, ((timestamp,) + values,))

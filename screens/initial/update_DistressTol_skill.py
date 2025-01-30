@@ -1,5 +1,4 @@
 from kivy.app import App
-from screens.initial.take_crisis_contact import TakeCrisisContactScreen
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
@@ -10,9 +9,9 @@ from data.db_helper import DBHelper
 from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
 
-class DistressTolScreen(Screen):
+class UpdateDistressTol(Screen):
     def __init__(self, **kwargs):
-        super(DistressTolScreen, self).__init__(**kwargs)
+        super(UpdateDistressTol, self).__init__(**kwargs)
         
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
         
@@ -20,23 +19,34 @@ class DistressTolScreen(Screen):
         layout.add_widget(title)
         
         description = Label(
-            text="Next, can you pick some distress tolerance skills that work best for you?",
+            text="I hear you found something that works better for you!",
             size_hint_y=None, height=100
         )
         layout.add_widget(description)
         
         skills = ["TIPP skills", "STOP", "Self-soothing", "Pros and cons","Something else"]
+
+        db = DBHelper()
+        self.past_selections = db.get_distress_tolerance()
+        db.close()
+        self.selected_list = []
+
         for skill in skills:
             btn = Button(text=skill, size_hint_y=None, height=50)
             btn.bind(on_release=self.action)
             layout.add_widget(btn)
 
+            search_str = skill.replace(" " and "-", "_")
+            if skill == "Something else":
+                search_str = "Other"
+            for key in self.past_selections.keys():
+                if search_str in key:
+                    btn.background_color = (0.39, 0.58, 0.93, 1)  # Light cornflower blue
+
         self.next_button = Button(text="Next", size_hint_y=None, height=50)
         self.next_button.bind(on_release=self.go_next)
         
         self.add_widget(layout)
-
-        self.selected_list=[]
     
     def action(self, instance):
         if instance.text == "TIPP skills":
@@ -77,7 +87,7 @@ class DistressTolScreen(Screen):
                     for child in layout.children:
                         if isinstance(child, TextInput) and not child.text:
                             replace_widget(child, child.hint_text)
-                return super(DistressTolScreen, self).on_touch_down(touch)
+                return super(UpdateDistressTol, self).on_touch_down(touch)
 
             self.bind(on_touch_down=on_touch_down)
                 
@@ -173,12 +183,19 @@ class DistressTolScreen(Screen):
         self.selected_list.append(save_str.replace(" ", "_"))
 
     def go_next(self, instance):
-        if len(self.selected_list) >= 3:
+        if len(self.selected_dict.items) >= 3:
             db = DBHelper()
             db.create_distress_tolerance_table()
-            db.set_preferred_distress_tolerance(self.selected_list)
+            db.set_preferred_distress_tolerance(self.selected_dict)
             db.close()
-            self.manager.current = TakeCrisisContactScreen
+            
+            done_btn = Button(text="Done", size_hint_y= None, width=100)
+            done_btn.bind(on_release=popup.dismiss())
+            popup = Popup(title="I'll keep your selections in mind!",
+                            content=done_btn,
+                            size_hint=(0.8, 0.3))
+            self.manager.current = self.manager.previous()
+        
         else:
             done_btn = Button(text="Done", size_hint_y= None, width=100)
             done_btn.bind(on_release=popup.dismiss())

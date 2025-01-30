@@ -44,9 +44,12 @@ class UserHelper:
             city VARCHAR(255),
             state VARCHAR(2),
             zip_code VARCHAR(5),
-            crisis_name VARCHAR(100),
-            crisis_relationship VARCHAR(100),
-            crisis_phone VARCHAR(20)   # in format ###-###-####
+            crisis_name1 VARCHAR(100),
+            crisis_relationship1 VARCHAR(100),
+            crisis_phone1 VARCHAR(20)   # in format ###-###-####,
+            crisis_name2 VARCHAR(100),
+            crisis_relationship2 VARCHAR(100),
+            crisis_phone2 VARCHAR(20)   # in format ###-###-####
         )
         """
         self.cursor.execute(create_query)
@@ -112,12 +115,16 @@ class UserHelper:
         self.cursor.execute(select_query)
         return self.cursor.fetchall()
     
-    def set_crisis_contact(self, name, relationship, phone):
+    def set_crisis_contact(self, contact_list):
         """
         Set crisis contact for user.
         """
-        update_query = "UPDATE user_data SET crisis_name = %s, crisis_relationship = %s, crisis_phone = %s WHERE id = {ID}"
-        self.cursor.execute(update_query, (name, relationship, phone))
+        update_query = """
+            UPDATE user_data 
+            SET crisis_name1 = %s, crisis_relationship1 = %s, crisis_phone1 = %s,
+            SET crisis_name2 = %s, crisis_relationship2 = %s, crisis_phone2 = %s,
+            WHERE id = ID"""
+        self.cursor.execute(update_query, (*contact_list,))
         self.conn.commit()
     
     def close(self):

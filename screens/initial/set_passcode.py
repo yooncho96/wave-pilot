@@ -7,7 +7,8 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
 
-from data.user_db_helper import UserHelper, ID
+from data.user_db_helper import UserHelper
+from screens.initial.take_mindfulness_skill import MindfulnessScreen
 
 class SetPasscodeScreen(Screen):
     def __init__(self, **kwargs):
@@ -55,4 +56,4 @@ class SetPasscodeScreen(Screen):
                     self.is_confirming = False
 
     def go_next(self):
-        self.manager.current = "set_mindfulness_skill"
+        self.manager.current = MindfulnessScreen

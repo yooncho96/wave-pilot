@@ -3,6 +3,8 @@ from tkinter import messagebox
 import sys
 
 from kivy.uix.screenmanager import Screen, SlideTransition
+from screens.crisis import CrisisScreen
+from screens.voice_diary.assess_emotion.record import RecordScreen
 
 class SuicidalScreen(Screen):
     def __init__(self, **kwargs):
@@ -31,7 +33,7 @@ class SuicidalScreen(Screen):
     
     def go_to_crisis(self):
         self.manager.transition = SlideTransition(direction="left")
-        self.manager.current = 'screens/crisis'
+        self.manager.current = CrisisScreen
 
     def no_response(self):
         self.label.pack_forget()
@@ -42,7 +44,7 @@ class SuicidalScreen(Screen):
 
     def go_to_record(self):
         self.manager.transition = SlideTransition(direction="left")
-        self.manager.current = 'screens/voice_diary/assess_emotion/record'
+        self.manager.current = RecordScreen
     
 app = SuicidalScreen()
 app.mainloop()

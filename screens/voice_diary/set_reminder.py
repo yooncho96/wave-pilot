@@ -11,7 +11,10 @@ import datetime
 import time
 from plyer import notification
 
-class SetReminderScreen(Screen):
+from screens.home import HomeScreen
+from screens.voice_diary.skill_willingness import OfferSkillScreen
+
+class SetReminderScreen(Screen):    
 
     def __init__(self, **kwargs):
         super(SetReminderScreen, self).__init__(**kwargs)
@@ -77,12 +80,13 @@ class SetReminderScreen(Screen):
         else:
             print("It looks like we are now past that time. Please enter a future time.")
 
-    def send_notification():
+    def send_notification(self):
         notification.notify(
             title="Reminder",
             message="I think you promised to try something today.",
             timeout=10
         )
+        notification.bind(on_release=self.to_skill)
     
     def on_set(self, instance):
         date_str, time_str = self.get_chosen_datetime()
@@ -97,4 +101,7 @@ class SetReminderScreen(Screen):
         close_button.bind(on_release=popup.dismiss)
         popup.open()
         self.manager.transition = SlideTransition(direction="left")
-        self.manager.current = "home_screen"
+        self.manager.current = HomeScreen
+
+    def to_skill(self):
+        self.manager.current = OfferSkillScreen(reminded=True)

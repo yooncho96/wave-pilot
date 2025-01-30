@@ -7,6 +7,7 @@ from kivy.uix.slider import Slider
 import json
 
 from data.db_helper import DBHelper
+from screens.voice_diary.skill_willingness import OfferSkillScreen
 
 class AdjustEmotionScreen(Screen):
     """
@@ -30,7 +31,7 @@ class AdjustEmotionScreen(Screen):
         # Apologize
         self.layout.add_widget(Label(
             text="""
-                I apologize. Can you help me get to know you better?\n
+                We apologize. Can you help us get to know you better?\n
             """
         ))
         self.layout.add_widget(Label(
@@ -105,6 +106,6 @@ class AdjustEmotionScreen(Screen):
         self.db_helper.adjust_emotion({emotion: round(slider_value, 1)})
 
         self.manager.transition = SlideTransition(direction="left")
-        self.manager.current = 'screens/voice_diary/skill_willingness'
+        self.manager.current = OfferSkillScreen
 
         

@@ -8,19 +8,22 @@ from kivy.uix.textinput import TextInput
 from kivy.clock import Clock
 
 from data.db_helper import DBHelper
+from screens.home import HomeScreen
+from screens.voice_diary.assess_emotion.confirm_emotion import ConfirmEmotionScreen
+
 from openai_api.openai_helper import transcribe_audio_via_openai, get_emotion_scores
 import sounddevice as sd
 import numpy as np
 import wave
 
 
-class SpeechScreen(Screen):
+class RecordScreen(Screen):
     """
     Screen to handle local audio file input, transcribe it,
     and get emotion scores from OpenAI.
     """
     def __init__(self, **kwargs):
-        super(SpeechScreen, self).__init__(**kwargs)
+        super(RecordScreen, self).__init__(**kwargs)
         layout = BoxLayout(orientation='vertical')
 
         record_btn = Button(text="Record", size_hint=(1, 0.1))
@@ -107,8 +110,8 @@ class SpeechScreen(Screen):
         db.close()
 
         self.manager.transition = SlideTransition(direction="left")
-        self.manager.current = 'confirm_emotion'
+        self.manager.current = ConfirmEmotionScreen
 
     def go_back_home(self, instance):
         self.manager.transition = SlideTransition(direction="right")
-        self.manager.current = "home_screen"
+        self.manager.current = HomeScreen

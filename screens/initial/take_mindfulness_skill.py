@@ -6,6 +6,7 @@ from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
 
 from data.db_helper import DBHelper
+from screens.initial.take_DistressTol_skill import DistressTolScreen
 from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
 
@@ -99,13 +100,12 @@ class MindfulnessScreen(Screen):
                   size_hint=(0.8, 0.3))
             popup.open()
         else:
-            self.selected_list = []
-            self.selected_list.append(skill)
+            self.selected_list.append(skill.replace(" ", "_"))
             self.add_tag(skill)
 
     def remove_tag(self, tag_layout, skill):
         self.remove_widget(tag_layout)
-        self.selected_list.remove(skill)
+        self.selected_list.remove(skill.replace(" ", "_"))
 
     def go_next(self, instance):
         if len(self.selected_list) >= 3:
@@ -113,7 +113,7 @@ class MindfulnessScreen(Screen):
             db.create_mindfulness_table()
             db.set_preferred_mindfulness(self.selected_list)
             db.close()
-            self.manager.current = "take_DistressTol_skill"
+            self.manager.current = DistressTolScreen
         else:
             done_btn = Button(text="Done", size_hint_y= None, width=100)
             done_btn.bind(on_release=popup.dismiss())

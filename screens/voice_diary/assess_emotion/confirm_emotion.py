@@ -7,7 +7,8 @@ from kivy.uix.label import Label
 from kivy.uix.slider import Slider
 
 from data.db_helper import DBHelper
-from data.db_helper import emotion_list
+from screens.voice_diary.skill_willingness import OfferSkillScreen
+from screens.voice_diary.assess_emotion.adjust_emotion import AdjustEmotionScreen
 
 class ConfirmEmotionScreen (Screen):
 
@@ -55,11 +56,11 @@ class ConfirmEmotionScreen (Screen):
         db.save_feedback(True)
         db.close()
         self.manager.transition = SlideTransition(direction="left")
-        self.manager.current = "screens/voice_diary/skill_willingness"
+        self.manager.current = OfferSkillScreen
         
     def adjust(self, instance):
         db = DBHelper()
         db.save_feedback(False)
         db.close()
         self.manager.transition = SlideTransition(direction="left")
-        self.manager.current = "screens/voice_diary/adjust_emotion"
+        self.manager.current = AdjustEmotionScreen
