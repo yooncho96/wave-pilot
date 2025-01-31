@@ -37,6 +37,7 @@ class DistressTolScreen(Screen):
         self.add_widget(layout)
 
         self.selected_list=[]
+        self.detail_list=["Sight","Sound","Touch","Smell","Taste"]
     
     def action(self, instance):
         if instance.text == "TIPP skills":
@@ -67,6 +68,7 @@ class DistressTolScreen(Screen):
                 layout.add_widget(replacement)
 
             layout = BoxLayout(orientation="vertical")
+            layout.add_widget(Label(text="You can list multiple methods separated with commas: a, b, ..."))
             for sense in ["Sight","Sound","Touch","Smell","Taste"]:
                 btn = Button(text=sense, size_hint_y=None, height=50)
                 btn.bind(on_release=lambda btn_instance: replace_widget(btn_instance, sense))
@@ -157,26 +159,29 @@ class DistressTolScreen(Screen):
         if original_instance.text in ["TIPP skills", "Self-soothing"]:     # instance = button, text input
             toggle_color(instance)
             if isinstance(instance, TextInput):
-                save_str = f"SelfSoothing_{instance.hint_text}"
+                save_type = f"SelfSoothing_{instance.hint_text}"
+                for sense in self.detail_list:
+                    if sense in save_type:
+                        self.detail_list.replace(sense, skill)
             else:
-                save_str = f"{original_instance.text}_{instance.text}"
+                save_type = f"{original_instance.text}_{instance.text}"
             if any(x.background_color == [0.39, 0.58, 0.93, 1] for x in instance.parent.children):
                 toggle_color(original_instance)
         else:
             toggle_color(original_instance)
             if original_instance.text == "Something else":
-                save_str = skill
+                save_type = skill
             else:
-                save_str = original_instance.text
+                save_type = original_instance.text
 
-        save_str = save_str.replace(" - ", "_")
-        self.selected_list.append(save_str.replace(" ", "_"))
+        save_type = save_type.replace(" - ", "_")
+        self.selected_list.append(save_type.replace(" ", "_"))
 
     def go_next(self, instance):
         if len(self.selected_list) >= 3:
             db = DBHelper()
             db.create_distress_tolerance_table()
-            db.set_preferred_distress_tolerance(self.selected_list)
+            db.set_preferred_distress_tolerance(self.selected_list, self.detail_list)
             db.close()
             self.manager.current = TakeCrisisContactScreen
         else:
