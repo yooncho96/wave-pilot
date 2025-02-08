@@ -1,0 +1,45 @@
+<SignUpScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        Label:
+            text: "Enter your ID:"
+            font_size: 18
+        
+        TextInput:
+            id: user_id_entry
+            multiline: False
+
+        Label:
+            text: "Enter your email:"
+            font_size: 18
+
+        TextInput:
+            id: email_entry
+            multiline: False
+
+        Button:
+            text: "Find Account"
+            on_press: root.find_account()
+            size_hint: (1, 0.2)
+
+        Label:
+            id: password_label
+            text: "Enter your password:"
+            font_size: 18
+            opacity: 0
+
+        TextInput:
+            id: password_entry
+            password: True
+            multiline: False
+            opacity: 0
+
+        Button:
+            id: submit_button
+            text: "Submit"
+            size_hint: (1, 0.2)
+            on_press: root.sign_up()
+            opacity: 0

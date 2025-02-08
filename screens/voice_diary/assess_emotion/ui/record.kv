@@ -1,0 +1,27 @@
+<RecordScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        Label:
+            text: "Record your thoughts below"
+            font_size: 24
+            size_hint_y: None
+            height: '40dp'
+
+        Button:
+            text: "Start Recording"
+            size_hint: (1, 0.1)
+            on_press: root.start_recording(self)
+            on_release: root.pause_recording(self)
+
+        Button:
+            text: "Transcribe"
+            size_hint: (1, 0.1)
+            on_release: root.on_transcribe(self)
+
+        Button:
+            text: "Back to Home"
+            size_hint: (1, 0.1)
+            on_release: root.go_back_home(self)

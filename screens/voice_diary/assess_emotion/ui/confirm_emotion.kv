@@ -1,0 +1,25 @@
+<ConfirmEmotionScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        Label:
+            id: message_label
+            text: ''
+            font_size: 18
+
+        BoxLayout:
+            id: emotion_box
+            orientation: 'vertical'
+            spacing: 10
+
+        Button:
+            text: "Confirm"
+            size_hint: (1, 0.1)
+            on_release: root.confirm(self)
+
+        Button:
+            text: "Deny"
+            size_hint: (1, 0.1)
+            on_release: root.adjust(self)

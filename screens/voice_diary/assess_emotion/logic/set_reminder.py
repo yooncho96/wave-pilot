@@ -1,64 +1,25 @@
 from kivy.uix.screenmanager import Screen, SlideTransition
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
-from kivy.uix.spinner import Spinner
-from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
-
+from kivy.lang import Builder
+import os
 import calendar
 import datetime
 import time
 from plyer import notification
 
-from screens.home import HomeScreen
-from screens.voice_diary.skill_willingness import OfferSkillScreen
-
 class SetReminderScreen(Screen):    
-
     def __init__(self, **kwargs):
         super(SetReminderScreen, self).__init__(**kwargs)
-        layout = BoxLayout(orientation='vertical', padding=20, spacing=10)
+        kv_path = os.path.join(os.path.dirname(__file__), '..', 'ui', 'set_reminder.kv')
+        Builder.load_file(kv_path)
 
-        reminder_label = Label(text="That's okay! When would be the best time for me to remind you?", font_size=18)
-        layout.add_widget(reminder_label)
-
-        day_label = Label(text="On:", font_size=18)
-        layout.add_widget(day_label)
-
-        self.day_spinner = Spinner(
-            text='Day of the week',
-            values=('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
-            size_hint=(1, 0.1)
-        )
-        layout.add_widget(self.day_spinner)
-
-        week_label = Label(text="of:", font_size=18)
-        layout.add_widget(week_label)
-
-        self.week_spinner = Spinner(
-            text='which',
-            values=('this', 'next'),
-            size_hint=(1, 0.1)
-        )
-        layout.add_widget(self.week_spinner)
-
-        time_label = Label(text="at", font_size=18)
-        layout.add_widget(time_label)
-
-        self.time_input = TextInput(hint_text="e.g., 12:00", size_hint=(1, 0.1))
-        layout.add_widget(self.time_input)
-
-        set_btn = Button(text="Set Reminder", size_hint=(1, 0.1))
-        set_btn.bind(on_release=self.on_set())
-        layout.add_widget(set_btn)
-
-        self.add_widget(layout)
-    
     def get_chosen_datetime(self):
-        chosen_day = self.day_spinner.text
-        chosen_week = self.week_spinner.text
-        chosen_time = self.time_input.text
+        chosen_day = self.ids.day_spinner.text
+        chosen_week = self.ids.week_spinner.text
+        chosen_time = self.ids.time_input.text
 
         today = datetime.date.today()
         days_ahead = (list(calendar.day_name).index(chosen_day) - today.weekday() + 7) % 7
@@ -101,7 +62,7 @@ class SetReminderScreen(Screen):
         close_button.bind(on_release=popup.dismiss)
         popup.open()
         self.manager.transition = SlideTransition(direction="left")
-        self.manager.current = HomeScreen
+        self.manager.current = 'home'
 
     def to_skill(self):
-        self.manager.current = OfferSkillScreen(reminded=True)
+        self.manager.current = 'offer_skill'

@@ -1,0 +1,52 @@
+<UpdateMindfulness>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+
+        Label:
+            text: "Mindfulness"
+            font_size: 32
+            size_hint_y: None
+            height: 50
+
+        Label:
+            text: "I see you've had a change of taste! Feel free to edit your choices."
+            size_hint_y: None
+            height: 100
+
+        Button:
+            text: "Breathing exercises"
+            size_hint_y: None
+            height: 50
+            on_release: root.show_dropdown(self)
+
+        Button:
+            text: "Observe and Describe"
+            size_hint_y: None
+            height: 50
+            on_release: root.show_dropdown(self)
+
+        Button:
+            text: "Participate"
+            size_hint_y: None
+            height: 50
+            on_release: root.show_dropdown(self)
+
+        Button:
+            text: "Mediation and self-reflection"
+            size_hint_y: None
+            height: 50
+            on_release: root.show_dropdown(self)
+
+        Button:
+            text: "Something else"
+            size_hint_y: None
+            height: 50
+            on_release: root.show_dropdown(self)
+
+        Button:
+            text: "Next"
+            size_hint_y: None
+            height: 50
+            on_release: root.go_next(self)

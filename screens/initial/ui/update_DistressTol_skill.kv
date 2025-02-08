@@ -1,0 +1,56 @@
+<UpdateDistressTol>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+
+        Label:
+            text: "Distress Tolerance"
+            font_size: 32
+            size_hint_y: None
+            height: '50dp'
+
+        Label:
+            text: "I hear you found something that works better for you!"
+            size_hint_y: None
+            height: '100dp'
+
+        BoxLayout:
+            id: layout
+            orientation: 'vertical'
+
+            Button:
+                text: "TIPP skills"
+                size_hint_y: None
+                height: '50dp'
+                on_release: root.action(self)
+
+            Button:
+                text: "STOP"
+                size_hint_y: None
+                height: '50dp'
+                on_release: root.action(self)
+
+            Button:
+                text: "Self-soothing"
+                size_hint_y: None
+                height: '50dp'
+                on_release: root.action(self)
+
+            Button:
+                text: "Pros and cons"
+                size_hint_y: None
+                height: '50dp'
+                on_release: root.action(self)
+
+            Button:
+                text: "Something else"
+                size_hint_y: None
+                height: '50dp'
+                on_release: root.action(self)
+
+        Button:
+            text: "Next"
+            size_hint_y: None
+            height: '50dp'
+            on_release: root.go_next(self)

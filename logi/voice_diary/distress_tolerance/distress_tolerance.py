@@ -6,7 +6,7 @@ from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
 
 from data.db_helper import DBHelper
-from screens.crisis import CrisisScreen
+from screens.logic.crisis import CrisisScreen
 from screens.voice_diary.distress_tolerance.practice_distress_tolerance import DistressToleranceGuideScreen
 
 from kivy.uix.popup import Popup

@@ -9,9 +9,9 @@ from kivy.graphics import Color, Rectangle
 from data.db_helper import DBHelper
 from functions.make_boxes import BorderedLabel, BorderedTextInput
 from functions.timer import Timer
-from screens.voice_diary.distress_tolerance.descriptions_practice import description_list, STOP, SelfSoothing, Pros_and_Cons, Other
-from screens.voice_diary.after_emotion_rate import AfterEmotionScreen
-from screens.crisis import CrisisScreen
+from screens.voice_diary.distress_tolerance.logic.descriptions_practice import description_list, STOP, SelfSoothing, Pros_and_Cons, Other
+from screens.voice_diary.assess_emotion.logic.after_emotion_rate import AfterEmotionScreen
+from screens.logic.crisis import CrisisScreen
 
 from kivy.uix.popup import Popup
 from typing import Union

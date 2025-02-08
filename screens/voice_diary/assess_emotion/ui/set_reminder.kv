@@ -1,0 +1,43 @@
+<SetReminderScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        Label:
+            text: "That's okay! When would be the best time for me to remind you?"
+            font_size: 18
+
+        Label:
+            text: "On:"
+            font_size: 18
+
+        Spinner:
+            id: day_spinner
+            text: 'Day of the week'
+            values: ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')
+            size_hint: (1, 0.1)
+
+        Label:
+            text: "of:"
+            font_size: 18
+
+        Spinner:
+            id: week_spinner
+            text: 'which'
+            values: ('this', 'next')
+            size_hint: (1, 0.1)
+
+        Label:
+            text: "at"
+            font_size: 18
+
+        TextInput:
+            id: time_input
+            hint_text: "e.g., 12:00"
+            size_hint: (1, 0.1)
+
+        Button:
+            text: "Set Reminder"
+            size_hint: (1, 0.1)
+            on_release: root.on_set(self)

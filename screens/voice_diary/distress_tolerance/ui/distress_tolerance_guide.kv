@@ -1,0 +1,27 @@
+<DistressToleranceGuideScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        Label:
+            id: encouragement_label
+            text: 'You're showing real courage and allowing yourself the self-care you deserve.'
+            font_size: 18
+            size_hint_y: None
+            height: '40dp'
+
+        BoxLayout:
+            id: content_box
+            orientation: 'vertical'
+            spacing: 10
+
+        Button:
+            text: "Next"
+            size_hint: (1, 0.2)
+            on_release: root.next_screen(self)
+
+        Button:
+            text: "Done"
+            size_hint: (1, 0.2)
+            on_release: root.done(self)

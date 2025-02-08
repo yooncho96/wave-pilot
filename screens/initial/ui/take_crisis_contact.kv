@@ -1,0 +1,62 @@
+<TakeCrisisContactScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        Label:
+            text: "Crisis contacts"
+            font_size: 32
+            size_hint_y: None
+            height: '50dp'
+
+        Label:
+            text: """
+                Lastly, we would like to save contact information of two people you trust the most.\n
+                We will encourage you to reach out to them when we feel that you are not safe.
+            """
+            size_hint_y: None
+            height: '100dp'
+
+        # Contact Information Inputs
+        BoxLayout:
+            orientation: 'vertical'
+
+            Label:
+                text: "Your person #1"
+                font_size: 20
+
+            TextInput:
+                id: name_input_1
+                hint_text: 'Name'
+
+            TextInput:
+                id: relationship_input_1
+                hint_text: 'Relationship to you'
+
+            TextInput:
+                id: phone_input_1
+                hint_text: 'Phone'
+
+        BoxLayout:
+            orientation: 'vertical'
+
+            Label:
+                text: "Your person #2"
+                font_size: 20
+
+            TextInput:
+                id: name_input_2
+                hint_text: 'Name'
+
+            TextInput:
+                id: relationship_input_2
+                hint_text: 'Relationship to you'
+
+            TextInput:
+                id: phone_input_2
+                hint_text: 'Phone'
+
+        Button:
+            text: 'Submit'
+            on_press: root.submit(self)

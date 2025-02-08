@@ -1,0 +1,42 @@
+<HomeScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        Label:
+            text: "Welcome."
+            font_size: 24
+
+        Image:
+            source: 'path/to/image.png'
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: (1, 0.3)
+            spacing: 10
+
+            Button:
+                text: "Check In"
+                size_hint: (1, 0.1)
+                on_release: root.go_to_check_in_screen(self)
+
+            Button:
+                text: "Voice Diary"
+                size_hint: (1, 0.1)
+                on_release: root.go_to_voice_diary_screen(self)
+
+            Button:
+                text: "Help"
+                size_hint: (1, 0.1)
+                on_release: root.go_to_help_screen(self)
+
+        AnchorLayout:
+            anchor_x: 'right'
+            anchor_y: 'top'
+
+            Button:
+                text: "Settings"
+                size_hint: (None, None)
+                size: (50, 50)
+                on_release: root.go_to_settings_screen(self)

@@ -1,30 +1,18 @@
-from kivy.app import App
-from kivy.uix.screenmanager import Screen, ScreenManager
-from kivy.uix.label import Label
+from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from kivy.uix.dropdown import DropDown
-
-from data.db_helper import DBHelper
 from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
+from kivy.lang import Builder
+import os
+
+from data.db_helper import DBHelper
 
 class UpdateDistressTol(Screen):
     def __init__(self, **kwargs):
         super(UpdateDistressTol, self).__init__(**kwargs)
-        
-        layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
-        
-        title = Label(text="Distress Tolerance", font_size=32, size_hint_y=None, height=50)
-        layout.add_widget(title)
-        
-        description = Label(
-            text="I hear you found something that works better for you!",
-            size_hint_y=None, height=100
-        )
-        layout.add_widget(description)
-        
-        skills = ["TIPP skills", "STOP", "Self-soothing", "Pros and cons","Something else"]
+        kv_path = os.path.join(os.path.dirname(__file__), '..', 'ui', 'update_DistressTol_skill.kv')
+        Builder.load_file(kv_path)
 
         db = DBHelper()
         self.past_selections = db.get_distress_tolerance()
@@ -33,23 +21,6 @@ class UpdateDistressTol(Screen):
         self.selected_list = []
         self.detail_list=["Sight","Sound","Touch","Smell","Taste"]
 
-        for skill in skills:
-            btn = Button(text=skill, size_hint_y=None, height=50)
-            btn.bind(on_release=self.action)
-            layout.add_widget(btn)
-
-            search_str = skill.replace(" " and "-", "_")
-            if skill == "Something else":
-                search_str = "Other"
-            for key in self.past_selections.keys():
-                if search_str in key:
-                    btn.background_color = (0.39, 0.58, 0.93, 1)  # Light cornflower blue
-
-        self.next_button = Button(text="Next", size_hint_y=None, height=50)
-        self.next_button.bind(on_release=self.go_next)
-        
-        self.add_widget(layout)
-    
     def action(self, instance):
         if instance.text == "TIPP skills":
             title = "TIPP skills for you to choose from:"
@@ -159,7 +130,6 @@ class UpdateDistressTol(Screen):
             popup.open()
 
     def change(self, instance, skill, original_instance):
-
         def toggle_color(instance):
             if instance.background_color == [0.39, 0.58, 0.93, 1]:  # Light cornflower blue = was selected before
                 instance.background_color = [1, 1, 1, 1]  # Reset to white = unselect
@@ -188,22 +158,19 @@ class UpdateDistressTol(Screen):
         self.selected_list.append(save_type.replace(" ", "_"))
 
     def go_next(self, instance):
-        if len(self.selected_dict.items) >= 3:
+        if len(self.selected_list) >= 3:
             db = DBHelper()
             db.create_distress_tolerance_table()
             db.set_preferred_distress_tolerance(self.selected_list, self.detail_list)
             db.close()
             
-            done_btn = Button(text="Done", size_hint_y= None, width=100)
-            done_btn.bind(on_release=popup.dismiss())
             popup = Popup(title="I'll keep your selections in mind!",
-                            content=done_btn,
-                            size_hint=(0.8, 0.3))
-            self.manager.current = self.manager.previous()
-        
-        else:
-            done_btn = Button(text="Done", size_hint_y= None, width=100)
-            done_btn.bind(on_release=popup.dismiss())
-            popup = Popup(title="Please select at least three skills.",
-                          content=done_btn,
+                          content=Button(text="Done", size_hint_y=None, width=100, on_release=lambda x: popup.dismiss()),
                           size_hint=(0.8, 0.3))
+            popup.open()
+            self.manager.current = self.manager.previous()
+        else:
+            popup = Popup(title="Please select at least three skills.",
+                          content=Button(text="Done", size_hint_y=None, width=100, on_release=lambda x: popup.dismiss()),
+                          size_hint=(0.8, 0.3))
+            popup.open()

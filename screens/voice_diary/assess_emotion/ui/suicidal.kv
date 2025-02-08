@@ -1,0 +1,27 @@
+<SuicidalScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        Label:
+            id: intro_label
+            text: "I see you might be in distress right now."
+            font_size: 18
+            opacity: 1
+
+        BoxLayout:
+            id: button_layout
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: '50dp'
+            spacing: 20
+            opacity: 0
+
+            Button:
+                text: "Yes"
+                on_release: root.go_to_crisis(self)
+
+            Button:
+                text: "No"
+                on_release: root.no_response(self)
