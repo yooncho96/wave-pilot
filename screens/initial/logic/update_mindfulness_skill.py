@@ -9,7 +9,7 @@ from kivy.uix.button import Button
 
 from data.db_helper import DBHelper
 
-import json
+import os
 
 class UpdateMindfulness(Screen):
     def __init__(self, **kwargs):
