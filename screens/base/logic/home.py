@@ -23,9 +23,12 @@ class HomeScreen(Screen):
         elif current_time.hour < 12:
             self.manager.transition = SlideTransition(direction="left")
             self.manager.current = 'mindfulness'
-        else:
+        elif current_time.hour > 18:
             self.manager.transition = SlideTransition(direction="left")
             self.manager.current = 'evening_diary'
+        else:
+            self.manager.transition = SlideTransition(direction="left")
+            self.manager.current = 'choose_checkin'
 
     def go_to_voice_diary_screen(self, instance):
         self.manager.transition = SlideTransition(direction="left")

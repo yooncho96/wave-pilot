@@ -9,7 +9,7 @@ import sounddevice as sd
 import numpy as np
 import wave
 
-from data.db_helper import DBHelper
+from data.diary_db_Helper import DBHelper
 from openai_api.openai_helper import transcribe_audio_via_openai, get_emotion_scores
 
 class RecordScreen(Screen):

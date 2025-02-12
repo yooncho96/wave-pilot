@@ -36,6 +36,7 @@ class UserHelper:
         create_query = """
         CREATE TABLE IF NOT EXISTS user_data (
             id INT PRIMARY KEY AUTO_INCREMENT,
+            wave_id INT,
             password VARCHAR(50),
             code VARCHAR(4),
             email VARCHAR(100),
@@ -61,16 +62,17 @@ class UserHelper:
         """
         User sets password.
         """
-        update_query = "UPDATE user_data SET password = %s WHERE id = %s"
+        update_query = "UPDATE user_data SET password = %s WHERE wave_id = %s"
         self.cursor.execute(update_query, (password, id))
         self.conn.commit()
+        global ID
         ID = id
 
     def find_matching_user(self, id, email):
         """
         find user that has id & email, return boolean
         """
-        select_query = "SELECT email FROM user_data WHERE id = (%s)"
+        select_query = "SELECT email FROM user_data WHERE wave_id = (%s)"
         self.cursor.execute(select_query, (id,))
         true_email = self.cursor.fetchall()[0][0]
         if email == true_email:
@@ -80,13 +82,13 @@ class UserHelper:
             return False
 
     def reset_code(self,code):
-        ID = self.lost_pw_email()[1]
-        update_query = "UPDATE user_data SET code = %s WHERE id = {ID}"
+        global ID
+        update_query = "UPDATE user_data SET code = %s WHERE wave_id = {ID}"
         self.cursor.execute(update_query, (code, ))
         self.conn.commit()
 
     def login(self, code):
-        select_query = "SELECT code FROM user_data WHERE id = {ID}"
+        select_query = "SELECT code FROM user_data WHERE wave_id = {ID}"
         self.cursor.execute(select_query)
         true_code = self.cursor.fetchall()[0][0]
         if code == true_code:
@@ -98,19 +100,22 @@ class UserHelper:
         """
         Set code for user.
         """
-        update_query = "UPDATE user_data SET code = %s WHERE id = {ID}"
+        global ID
+        update_query = "UPDATE user_data SET code = %s WHERE wave_id = {ID}"
         self.cursor.execute(update_query, (code, ))
         self.conn.commit()
 
     def get_password(self):
-        select_query = "SELECT password FROM user_data WHERE id = {ID}"
+        global ID
+        select_query = "SELECT password FROM user_data WHERE wave_id = {ID}"
         self.cursor.execute(select_query)
         return self.cursor.fetchall()[0][0]
     
-    def get_user_data(self):
+    def get_user_data(self, var):
         """
-        Fetch all data from table.
+        Fetch all data for user from table.
         """
+        global ID
         select_query = f"SELECT * FROM user_data WHERE id = {ID}"
         self.cursor.execute(select_query)
         return self.cursor.fetchall()
@@ -119,11 +124,12 @@ class UserHelper:
         """
         Set crisis contact for user.
         """
+        global ID
         update_query = """
             UPDATE user_data 
             SET crisis_name1 = %s, crisis_relationship1 = %s, crisis_phone1 = %s,
             SET crisis_name2 = %s, crisis_relationship2 = %s, crisis_phone2 = %s,
-            WHERE id = ID"""
+            WHERE id = {ID}"""
         self.cursor.execute(update_query, (*contact_list,))
         self.conn.commit()
     

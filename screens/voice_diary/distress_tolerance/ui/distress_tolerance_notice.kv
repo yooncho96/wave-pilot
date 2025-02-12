@@ -1,4 +1,4 @@
-<DistressTolerancePracticeScreen>:
+<DistressToleranceScreen>:
     BoxLayout:
         orientation: 'vertical'
         padding: 20
@@ -11,23 +11,15 @@
             height: '40dp'
 
         Label:
-            id: skill_label
+            id: message_label
             text: ''
             font_size: 20
             size_hint_y: None
-            height: '40dp'
+            height: '80dp'
 
         Button:
-            text: "Next Skill"
+            text: "Next"
             size_hint: (1, 0.1)
             on_release: root.display_skills()
 
-        Button:
-            text: "Show Contacts"
-            size_hint: (1, 0.1)
-            on_release: root.show_contacts()
 
-        Button:
-            text: "Random Skill"
-            size_hint: (1, 0.1)
-            on_release: root.random_skill()

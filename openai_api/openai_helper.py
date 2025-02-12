@@ -4,7 +4,7 @@ import os
 import sys
 import openai
 import json
-import data.db_helper as db
+import data.diary_db_Helper as db
 
 from dotenv import load_dotenv
 load_dotenv()

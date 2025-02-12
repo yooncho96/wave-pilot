@@ -19,7 +19,7 @@
             text: "TIPP skills"
             size_hint_y: None
             height: 50
-            on_release: root.action(self)
+            on_release: root.tipp_action(self)
 
         Button:
             text: "STOP"
@@ -31,7 +31,7 @@
             text: "Self-soothing"
             size_hint_y: None
             height: 50
-            on_release: root.action(self)
+            on_release: root.soothing_action(self)
 
         Button:
             text: "Pros and cons"
@@ -43,7 +43,7 @@
             text: "Something else"
             size_hint_y: None
             height: 50
-            on_release: root.action(self)
+            on_release: root.show_custom_input(self)
 
         Button:
             text: "Next"

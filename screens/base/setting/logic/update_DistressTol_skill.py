@@ -6,7 +6,7 @@ from kivy.uix.popup import Popup
 from kivy.lang import Builder
 import os
 
-from data.db_helper import DBHelper
+from data.skills_db_Helper import DBHelper
 
 class UpdateDistressTol(Screen):
     def __init__(self, **kwargs):

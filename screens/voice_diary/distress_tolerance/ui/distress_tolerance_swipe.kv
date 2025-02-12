@@ -1,0 +1,32 @@
+<DistressToleranceScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+        on_touch_move: root.on_touch_move()
+
+        Label:
+            text: "Distress Tolerance"
+            font_size: 24
+            size_hint_y: None
+            height: '40dp'
+
+        Label:
+            text: "Would you like to try..."
+            font_size: 20
+            size_hint_y: None
+            height: '40dp'
+
+        Label:
+            id: skill_label
+            text: ""
+            font_size: 24
+            size_hint: None
+            height: '40dp'
+
+        Label:
+            text: "Swipe right to start practicing. Swipe left to see a different skill. Swipe down if you cannot use that skill right now."
+            font_size: 18
+            
+
+

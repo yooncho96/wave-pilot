@@ -1,7 +1,7 @@
 from kivy.uix.screenmanager import Screen, SlideTransition
 from kivy.lang import Builder
 import os
-from data.db_helper import DBHelper
+from data.diary_db_Helper import DBHelper
 
 class OfferSkillScreen(Screen):
     def __init__(self, reminded=False, **kwargs):

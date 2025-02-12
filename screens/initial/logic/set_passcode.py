@@ -21,10 +21,12 @@ class SetPasscodeScreen(Screen):
         self.is_confirming = False
 
     def on_key_press(self, instance):
-        if len(self.ids.passcode_input.text) < 4:
-            self.ids.passcode_input.text += instance.text
+        entered_len = len(self.ids.passcode_input.text)
+        if entered_len < 4:
+            self.ids.passcode_input.text = "*" * (entered_len-1) + instance.text
+            self.passcode += instance.text
 
-        if len(self.ids.passcode_input.text) == 4:
+        if entered_len == 4:
             if not self.is_confirming:
                 self.passcode = self.ids.passcode_input.text
                 self.ids.passcode_input.text = ""
@@ -34,6 +36,7 @@ class SetPasscodeScreen(Screen):
                 self.confirm_passcode = self.ids.passcode_input.text
                 if self.passcode == self.confirm_passcode:
                     userdb = UserHelper()
+                    self.new = any(not item for item in userdb.get_user_data())
                     userdb.set_code(self.passcode)
                     userdb.close()
                     self.show_popup("Code Set", "Your passcode has been set successfully.")
@@ -52,4 +55,7 @@ class SetPasscodeScreen(Screen):
         popup.open()
 
     def go_next(self, instance):
-        self.manager.current = 'Take_Mindfulness'
+        if self.new:
+            self.manager.current = 'Take_Mindfulness'
+        else:
+            self.manager.current = 'home'

@@ -14,7 +14,7 @@ class SuicidalScreen(Screen):
 
     def fade_out_label(self, dt):
         self.ids.intro_label.opacity = 0
-        Clock.schedule_once(self.show_question, 1)
+        Clock.schedule_once(self.show_question, dt)
 
     def show_question(self, dt):
         self.ids.intro_label.text = "Are you having thoughts of killing yourself right now?"

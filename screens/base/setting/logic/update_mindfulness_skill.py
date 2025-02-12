@@ -7,7 +7,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 
-from data.db_helper import DBHelper
+from data.skills_db_Helper import DBHelper
 
 import os
 

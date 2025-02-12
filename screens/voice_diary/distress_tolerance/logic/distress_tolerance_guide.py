@@ -2,10 +2,11 @@ from kivy.uix.screenmanager import Screen, FadeTransition
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
+from kivy.core.window import Window
 from kivy.lang import Builder
 import os
 
-from data.db_helper import DBHelper
+from data.skills_db_Helper import DBHelper
 from functions.make_boxes import BorderedLabel, BorderedTextInput
 from functions.timer import Timer
 from screens.voice_diary.distress_tolerance.logic.descriptions_practice import description_list, STOP, SelfSoothing, Pros_and_Cons, Other
@@ -22,10 +23,13 @@ skills_dict = {
 
 class DistressToleranceGuideScreen(Screen):
 
-    def __init__(self, skill_label: Label, **kwargs):
+    def __init__(self, **kwargs):
         super(DistressToleranceGuideScreen, self).__init__(**kwargs)
         kv_path = os.path.join(os.path.dirname(__file__), '..', 'ui', 'distress_tolerance_guide.kv')
         Builder.load_file(kv_path)
+        self.skill_label = ""   # a Label
+
+    def get_skill(self, skill_label):
         self.skill_label = skill_label
 
     def next_screen(self, instance):
@@ -39,7 +43,10 @@ class DistressToleranceGuideScreen(Screen):
             self.idv_layouts(Other)
 
     def idv_layouts(self, description: Union[str, list]):
-        self.ids.content_box.clear_widgets()
+        self.clear_widgets()
+        self.ids.clear()
+        kv_path = os.path.join(os.path.dirname(__file__), '..', 'ui', 'distress_tolerance_guide_layouts.kv')
+        Builder.load_file(kv_path)
 
         title_label = Label(text=self.skill_label.text, bold=True, font_size='20sp')
         self.ids.content_box.add_widget(title_label)

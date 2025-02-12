@@ -6,7 +6,7 @@ from kivy.uix.slider import Slider
 from kivy.lang import Builder
 import os
 
-from data.db_helper import DBHelper
+from data.diary_db_Helper import DBHelper
 
 class AdjustEmotionScreen(Screen):
     """
